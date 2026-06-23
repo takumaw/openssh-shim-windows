@@ -23,6 +23,7 @@ target_compile_definitions(shim_core PRIVATE
 
 add_executable(ssh
   src/ssh_main.c
+  src/ssh.rc
 )
 
 target_link_libraries(ssh PRIVATE shim_core)
@@ -30,6 +31,7 @@ set_target_properties(ssh PROPERTIES OUTPUT_NAME "ssh")
 
 add_executable(scp
   src/scp_main.c
+  src/scp.rc
 )
 
 target_link_libraries(scp PRIVATE shim_core)
