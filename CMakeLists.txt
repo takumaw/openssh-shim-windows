@@ -53,6 +53,8 @@ if(MSVC)
       /W4
       /WX
       /guard:cf
+      /sdl
+      /analyze
     )
   endforeach()
 
