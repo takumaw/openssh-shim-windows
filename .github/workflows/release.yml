@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Release Notes and Version
+        shell: powershell
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ($tag -notlike "v*") {
+              Write-Error "Invalid tag name: $tag"
+              exit 1
+          }
+          $version = $tag.Substring(1)
+          $history = Get-Content HISTORY.md -Raw
+          # Match markdown header "## X.Y.Z" and get content until next "##" or end of file
+          $pattern = "(?s)(?<=##\s+$version\r?\n)(.*?)(?=\r?\n##\s+|\Z)"
+          if ($history -match $pattern) {
+              $releaseNotes = $Matches[0].Trim()
+              $releaseNotes | Out-File -FilePath release_notes.md -Encoding utf8
+          } else {
+              Write-Error "Release notes for version $version not found in HISTORY.md"
+              exit 1
+          }
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run Smoke Test
+        run: powershell -ExecutionPolicy Bypass -File tests/smoke.ps1 -BuildDir build/Release
+
+      - name: Package Release
+        shell: powershell
+        run: |
+          # Create staging directory to bundle files without nested paths
+          New-Item -ItemType Directory -Path release_staging | Out-Null
+          Copy-Item build/Release/ssh.exe release_staging/
+          Copy-Item build/Release/scp.exe release_staging/
+          Copy-Item README.md release_staging/
+          Copy-Item LICENSE.txt release_staging/
+          
+          # Zip the bundle with the correct name format
+          $tag = "${{ github.ref_name }}"
+          $zipName = "openssh-shim-windows-$tag-x86_64-pc-windows-msvc.zip"
+          Compress-Archive -Path release_staging/* -DestinationPath $zipName -Force
+          
+          # Generate hash for the zip only
+          $zipHash = (Get-FileHash -Algorithm SHA256 $zipName).Hash.ToLower()
+          
+          # Format hash file with exactly two spaces between hash and filename (standard sha256sum format)
+          "$zipHash  $zipName" | Out-File -FilePath SHA256SUMS.txt -Encoding ascii
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          files: |
+            openssh-shim-windows-v*-x86_64-pc-windows-msvc.zip
+            SHA256SUMS.txt
