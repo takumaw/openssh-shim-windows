@@ -48,17 +48,23 @@ Before creating a tag:
 * `LICENSE.txt` is present.
 * `HISTORY.md` contains the release entry.
 * The `HISTORY.md` heading is exactly `## X.Y.Z`.
+* `src/ssh.rc` and `src/scp.rc` have their version fields updated to `X,Y,Z,0` and `"X.Y.Z.0"`.
 * CI passes on `main`.
 * The local release build and smoke test pass if run manually.
 
 ## Creating a release
 
-Example for `v0.1.0`:
+To trigger a release (e.g., `v0.1.0`), commit the version updates and push a signed Git tag:
 
 ```powershell
-git add README.md HISTORY.md CONTRIBUTING.md docs/DESIGN.md docs/RELEASE.md CMakeLists.txt src tests .github
+# 1. Update files, commit changes
+git add HISTORY.md README.md src/ssh.rc src/scp.rc
 git commit -m "Prepare v0.1.0 release"
-git tag v0.1.0
+
+# 2. Create a signed tag
+git tag -s v0.1.0 -m "Release v0.1.0"
+
+# 3. Push main branch and the tag
 git push origin main
 git push origin v0.1.0
 ```
