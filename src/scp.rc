@@ -1,8 +1,8 @@
 #include <winres.h>
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ FILEVERSION 0,1,1,0
+ PRODUCTVERSION 0,1,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -19,12 +19,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Takuma WATANABE"
             VALUE "FileDescription", "scp shim for Windows OpenSSH"
-            VALUE "FileVersion", "0.1.0.0"
+            VALUE "FileVersion", "0.1.1.0"
             VALUE "InternalName", "scp.exe"
             VALUE "LegalCopyright", "(C) 2026 Takuma WATANABE"
             VALUE "OriginalFilename", "scp.exe"
             VALUE "ProductName", "openssh-shim-windows"
-            VALUE "ProductVersion", "0.1.0.0"
+            VALUE "ProductVersion", "0.1.1.0"
         END
     END
     BLOCK "VarFileInfo"
